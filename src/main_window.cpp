@@ -30,6 +30,10 @@ MainWindow::MainWindow(
 		m_add_port_button, &QPushButton::pressed, 
 		this, &MainWindow::add_port 
 	);
+	connect(
+		m_clear_button, &QPushButton::pressed, 
+		this, &MainWindow::clear_timeline 
+	);
 
 	m_expression_symbols.add_pi();
 	m_expression_symbols.add_variable("x", x);
@@ -65,28 +69,32 @@ MainWindow::MainWindow(
 	hlay->addWidget(m_clear_button);
 	hlay->addWidget(m_start_stop_button);
 
-	// connect(
-	// 	m_ports->ports()[0].get(), &QSerialPort::readyRead,
-	// 	this, &MainWindow::append_sample 
-	// );
+	connect(
+		m_ports, &port_table_model::port_added,
+		[&](port* port) {
+			if (not port->serial->isOpen())
+				return;
+			connect( 
+				port->serial.get(), &QSerialPort::readyRead,
+				[this, port]() { process_input_samples(port); }
+			);
+		}
+	);
 }
 
-void MainWindow::append_sample() { 
+void MainWindow::process_input_samples(port* pt) { 
 	if (not m_is_plotting)
 		return;
 
-	if (not m_parser.compile(m_transform_line_edit->text().toStdString(), m_expression)) { 
+	if (not m_parser.compile(m_transform_line_edit->text().toStdString(), m_expression))
 		return;
-	}
 
-	QCPGraphData data;
-
-	while (not m_ports->ports()[0].serial->atEnd()) { 
+	while (not pt->serial->atEnd()) { 
 		uint8_t sample;
-		m_ports->ports()[0].serial->read(reinterpret_cast<char*>(&sample), 1);
+		pt->serial->read(reinterpret_cast<char*>(&sample), 1);
 		x = sample;
 		m_graph->addData(m_t++, m_expression.value());
-		qDebug() << QString("%1, %2").arg(m_t - 1).arg(sample);
+		qDebug() << QString("%1: %2, %3").arg(pt->name).arg(m_t - 1).arg(sample);
 	}
 
 	m_plot->replot();
@@ -94,6 +102,7 @@ void MainWindow::append_sample() {
 
 void MainWindow::clear_timeline() { 
 	m_graph->data().clear();
+	m_t = 0;
 	m_plot->replot();
 }
 
@@ -102,7 +111,7 @@ void MainWindow::start_stop_button_pressed() {
 		m_start_stop_button->setText("Start");
 		m_is_plotting = false;
 	} else {
-		m_ports->ports()[0].serial->readAll();
+		m_ports->ports()[0]->serial->readAll();
 		m_start_stop_button->setText("Stop");
 		m_is_plotting = true;
 	}

@@ -23,7 +23,7 @@ class MainWindow: public QMainWindow {
 	MainWindow(QWidget* parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
 
 private slots:
-	void append_sample();
+	void process_input_samples(port* pt);
 	void clear_timeline();
 	void start_stop_button_pressed();
 	void add_port();
