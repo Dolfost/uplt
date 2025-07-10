@@ -21,16 +21,16 @@ port_spec_dialog::port_spec_dialog(QWidget *parent, Qt::WindowFlags f) {
 	name_text->setPlaceholderText("COM1 or /dev/cu.usbserial1120");
 	connect( 
 		name_text, &QLineEdit::textEdited,
-		[&]() { m_spec.name = name_text->text().toStdString(); }
+		[&, name_text]() { m_spec.name = name_text->text().toStdString(); }
 	);
 	name_lay->addWidget(name_text);
 
 	alias_lay->addWidget(new QLabel("Alias"));
 	auto alias_text = new QLineEdit;
-	alias_text->setPlaceholderText("eq. thermometer1");
+	alias_text->setPlaceholderText("eq. thermometer");
 	connect( 
 		alias_text, &QLineEdit::textEdited,
-		[&]() { m_spec.alias = alias_text->text().toStdString(); }
+		[&, alias_text]() { m_spec.alias = alias_text->text().toStdString(); }
 	);
 	alias_lay->addWidget(alias_text);
 
@@ -40,7 +40,7 @@ port_spec_dialog::port_spec_dialog(QWidget *parent, Qt::WindowFlags f) {
 	data_bits->setValue(m_spec.data_bits);
 	connect( 
 		data_bits, &QSpinBox::valueChanged,
-		[&]() { m_spec.data_bits = data_bits->value(); } 
+		[&, data_bits]() { m_spec.data_bits = data_bits->value(); } 
 	);
 	data_bits->setPrefix("Data bits ");
 	data_stop_baud_lay->addWidget(data_bits);
@@ -52,7 +52,7 @@ port_spec_dialog::port_spec_dialog(QWidget *parent, Qt::WindowFlags f) {
 	stop_bits->setValue(m_spec.stop_bits);
 	connect( 
 		stop_bits, &QSpinBox::valueChanged,
-		[&]() { m_spec.stop_bits = stop_bits->value(); } 
+		[&, stop_bits]() { m_spec.stop_bits = stop_bits->value(); } 
 	);
 	stop_bits->setPrefix("Stop bits ");
 	data_stop_baud_lay->addWidget(stop_bits);
@@ -62,15 +62,10 @@ port_spec_dialog::port_spec_dialog(QWidget *parent, Qt::WindowFlags f) {
 	baud->setValue(m_spec.baud);
 	connect( 
 		baud, &QSpinBox::valueChanged,
-		[&]() { m_spec.baud = baud->value(); } 
+		[&, baud]() { m_spec.baud = baud->value(); } 
 	);
 	baud->setPrefix("BAUD ");
 	data_stop_baud_lay->addWidget(baud);
-
-	main_lay->addLayout(name_lay);
-	main_lay->addLayout(alias_lay);
-	main_lay->addLayout(data_stop_baud_lay);
-	setLayout(main_lay);
 
 
 	auto buttons_lay = new QHBoxLayout;
@@ -82,13 +77,19 @@ port_spec_dialog::port_spec_dialog(QWidget *parent, Qt::WindowFlags f) {
 
 	confirm->setDefault(true);
 	connect( 
-		cancel, &QPushButton::pressed,
-		[&]() { accept(); }
+		confirm, &QPushButton::pressed,
+		this, &port_spec_dialog::accept
 	);
 	connect( 
 		cancel, &QPushButton::pressed,
-		[&]() { reject(); }
+		this, &port_spec_dialog::reject
 	);
+
+	main_lay->addLayout(name_lay);
+	main_lay->addLayout(alias_lay);
+	main_lay->addLayout(data_stop_baud_lay);
+	main_lay->addLayout(buttons_lay);
+	setLayout(main_lay);
 }
 
 }

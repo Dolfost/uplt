@@ -2,16 +2,6 @@
 
 namespace uplt { 
 
-bool port_table_model::insertRows(int row, int count, const QModelIndex &parent) {
-	beginInsertRows(parent, row, row + count - 1);
-
-	for (int i = 0; i < count; ++i)
-		m_ports.insert(m_ports.begin() + row + i, std::make_unique<QSerialPort>());
-
-	endInsertRows();
-	return true;
-}
-
 bool port_table_model::removeRows(int row, int count, const QModelIndex &parent) {
 	beginRemoveRows(parent, row, row + count - 1);
 
@@ -30,22 +20,41 @@ int port_table_model::rowCount(const QModelIndex &parent) const {
 };
 
 QVariant port_table_model::data(const QModelIndex &index, int role) const { 
-	auto row = index.row();
-	if (role == Qt::DisplayRole) {
-		switch (index.column()) { 
-			case column::plot_icon: {
-				return QPixmap(100, 100); break; 
-			} case column::name: {
-				return m_ports[row]->portName(); break; 
-			} case column::data_bits: { 
-				return m_ports[row]->dataBits(); break; 
-			} case column::stop_bits: { 
-				return m_ports[row]->stopBits();  break; 
-			} case column::baud: { 
-				return m_ports[row]->baudRate();  break; 
+	if (!index.isValid() || index.row() >= m_ports.size())
+    return QVariant();
+
+	const port& p = m_ports[index.row()];
+	switch (role) {
+		case Qt::DisplayRole: {
+			switch (index.column()) { 
+				case column::plot_icon: {
+					return QPixmap(100, 100); break; 
+				} case column::name: {
+					if (not p.alias.empty())
+						return QString::fromStdString(p.alias);
+					if (p.serial->isOpen())
+						return p.serial->portName();
+					return QString("<unavailable>");
+				} case column::data_bits: { 
+					return p.serial->dataBits();
+				} case column::stop_bits: { 
+					return p.serial->stopBits();
+				} case column::baud: { 
+					return p.serial->baudRate();
+				}
+			break; }
+		} case Qt::ToolTipRole: {
+			switch (index.column()) {
+				case column::name: {
+					if (not p.serial->isOpen())
+						return QString::fromStdString(p.name);
+					if (not p.alias.empty()) 
+						return QString::fromStdString(p.alias);
+				}
 			}
-		}
+		break; }
 	}
+
 	return QVariant();
 }
 
@@ -55,42 +64,41 @@ QVariant port_table_model::headerData(int section, Qt::Orientation orientation, 
 			return section + 1;
 		switch (section) { 
 			case column::plot_icon: { 
-				return "line"; break;
+				return "line";
 			} case column::name: { 
-				return "name"; break;
+				return "name";
 			} case column::data_bits: { 
-				return "db"; break;
+				return "db";
 			} case column::stop_bits: { 
-				return "sb"; break;
+				return "sb";
 			} case column::baud: { 
-				return "baud"; break;
+				return "baud";
 			} 
 		}
 	}
 	return QVariant();
 }
 
-void port_table_model::add_port(const port_spec& port) {
+void port_table_model::add_port(const port_spec& ps) {
 	beginInsertRows(QModelIndex(), m_ports.size(), m_ports.size());
 
 	auto sp = new QSerialPort;
 
-	sp->setPortName(QString::fromStdString(port.name));
-	switch (port.data_bits) { 
-		case 5: {sp->setDataBits(QSerialPort::DataBits::Data5); break; }
-		case 6: {sp->setDataBits(QSerialPort::DataBits::Data6); break; }
-		case 7: {sp->setDataBits(QSerialPort::DataBits::Data7); break; }
-		case 8: {sp->setDataBits(QSerialPort::DataBits::Data8); break; }
+	sp->setPortName(QString::fromStdString(ps.name));
+	switch (ps.data_bits) { 
+		case 5: { sp->setDataBits(QSerialPort::DataBits::Data5); break; }
+		case 6: { sp->setDataBits(QSerialPort::DataBits::Data6); break; }
+		case 7: { sp->setDataBits(QSerialPort::DataBits::Data7); break; }
+		case 8: { sp->setDataBits(QSerialPort::DataBits::Data8); break; }
 	}
-	switch (port.stop_bits) { 
-		case 1: {sp->setStopBits(QSerialPort::StopBits::OneStop); break; }
-		case 2: {sp->setStopBits(QSerialPort::StopBits::TwoStop); break; }
+	switch (ps.stop_bits) { 
+ 		case 1: { sp->setStopBits(QSerialPort::StopBits::OneStop); break; }
+		case 2: { sp->setStopBits(QSerialPort::StopBits::TwoStop); break; }
 	}
-	sp->setBaudRate(port.baud);
+	sp->setBaudRate(ps.baud);
 	sp->open(QSerialPort::ReadOnly);
 
-
-	m_ports.push_back(std::unique_ptr<QSerialPort>(sp));
+	m_ports.push_back(std::move(port(sp, ps)));
 
 	endInsertRows();
 }

@@ -26,6 +26,7 @@ private slots:
 	void append_sample();
 	void clear_timeline();
 	void start_stop_button_pressed();
+	void add_port();
 
 private:
 	QVBoxLayout* m_lay = new QVBoxLayout;
@@ -38,6 +39,7 @@ private:
 
 	QPushButton* m_start_stop_button = new QPushButton;
 	QPushButton* m_clear_button = new QPushButton;
+	QPushButton* m_add_port_button = new QPushButton;
 	QLineEdit* m_transform_line_edit = new QLineEdit("x");
 	QCustomPlot* m_plot = new QCustomPlot;
 	QCPGraph* m_graph = nullptr;

@@ -12,13 +12,18 @@
 
 namespace uplt { 
 
+struct port: public port_spec {
+	port(QSerialPort* p, const port_spec& ps): port_spec(ps), serial(p) {};
+	port() = delete;
+	std::unique_ptr<QSerialPort> serial;
+};
+
 class port_table_model: public QAbstractTableModel { 
 	Q_OBJECT
 public:
-	using port_list = std::vector<std::unique_ptr<QSerialPort>>;
+	using port_list = std::vector<port>;
 
 public:
-	bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
 	bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
 
 	int rowCount(const QModelIndex &parent = QModelIndex()) const override;

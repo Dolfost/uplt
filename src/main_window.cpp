@@ -5,6 +5,7 @@
 #include <QSplitter>
 
 #include <uplt/port_table_view.hpp>
+#include <uplt/port_spec_dialog.hpp>
 
 namespace uplt {
 
@@ -20,9 +21,14 @@ MainWindow::MainWindow(
 
 	m_clear_button->setText("Clear");
 	m_start_stop_button->setText("Start");
+	m_add_port_button->setText("Add port...");
 	connect(
 		m_start_stop_button, &QPushButton::pressed, 
 		this, &MainWindow::start_stop_button_pressed 
+	);
+	connect(
+		m_add_port_button, &QPushButton::pressed, 
+		this, &MainWindow::add_port 
 	);
 
 	m_expression_symbols.add_pi();
@@ -55,15 +61,14 @@ MainWindow::MainWindow(
 	m_lay->addLayout(hlay);
 	hlay->addWidget(new QLabel("y(x) = "));
 	hlay->addWidget(m_transform_line_edit);
+	hlay->addWidget(m_add_port_button);
 	hlay->addWidget(m_clear_button);
 	hlay->addWidget(m_start_stop_button);
 
-	m_ports->add_port({ "/dev/cu.usbserial-1120"});
-	
-	connect(
-		m_ports->ports()[0].get(), &QSerialPort::readyRead,
-		this, &MainWindow::append_sample 
-	);
+	// connect(
+	// 	m_ports->ports()[0].get(), &QSerialPort::readyRead,
+	// 	this, &MainWindow::append_sample 
+	// );
 }
 
 void MainWindow::append_sample() { 
@@ -76,9 +81,9 @@ void MainWindow::append_sample() {
 
 	QCPGraphData data;
 
-	while (not m_ports->ports()[0]->atEnd()) { 
+	while (not m_ports->ports()[0].serial->atEnd()) { 
 		uint8_t sample;
-		m_ports->ports()[0]->read(reinterpret_cast<char*>(&sample), 1);
+		m_ports->ports()[0].serial->read(reinterpret_cast<char*>(&sample), 1);
 		x = sample;
 		m_graph->addData(m_t++, m_expression.value());
 		qDebug() << QString("%1, %2").arg(m_t - 1).arg(sample);
@@ -97,10 +102,18 @@ void MainWindow::start_stop_button_pressed() {
 		m_start_stop_button->setText("Start");
 		m_is_plotting = false;
 	} else {
-		m_ports->ports()[0]->flush();
+		m_ports->ports()[0].serial->readAll();
 		m_start_stop_button->setText("Stop");
 		m_is_plotting = true;
 	}
+}
+
+void MainWindow::add_port() {
+	auto dialog = new uplt::port_spec_dialog(this);
+	dialog->exec();
+	if (dialog->result() == QDialog::Accepted)
+		m_ports->add_port(dialog->spec());
+	delete dialog;
 }
 
 }
