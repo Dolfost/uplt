@@ -48,6 +48,7 @@ QVariant port_table_model::data(const QModelIndex &index, int role) const {
 	}
 	return QVariant();
 }
+
 QVariant port_table_model::headerData(int section, Qt::Orientation orientation, int role) const { 
 	if (role == Qt::DisplayRole) { 
 		if (orientation == Qt::Vertical) 
