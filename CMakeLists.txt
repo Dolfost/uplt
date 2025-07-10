@@ -32,11 +32,13 @@ target_sources(uplt
 		src/main_window.cpp
 		src/port_table_model.cpp
 		src/port_table_view.cpp
+		src/port_spec_dialog.cpp
 	PUBLIC FILE_SET HEADERS BASE_DIRS include/ FILES
 		include/uplt/main_window.hpp
 		include/uplt/port_table_model.hpp
 		include/uplt/port_table_view.hpp
 		include/uplt/port_spec.hpp
+		include/uplt/port_spec_dialog.hpp
 )
 
 target_link_libraries(uplt PRIVATE

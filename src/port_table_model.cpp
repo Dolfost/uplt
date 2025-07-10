@@ -75,7 +75,7 @@ void port_table_model::add_port(const port_spec& port) {
 
 	auto sp = new QSerialPort;
 
-	sp->setPortName(port.name);
+	sp->setPortName(QString::fromStdString(port.name));
 	switch (port.data_bits) { 
 		case 5: {sp->setDataBits(QSerialPort::DataBits::Data5); break; }
 		case 6: {sp->setDataBits(QSerialPort::DataBits::Data6); break; }
