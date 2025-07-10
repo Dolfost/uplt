@@ -101,7 +101,7 @@ void MainWindow::process_input_samples(port* pt) {
 }
 
 void MainWindow::clear_timeline() { 
-	m_graph->data().clear();
+	m_graph->data()->clear();
 	m_t = 0;
 	m_plot->replot();
 }
