@@ -50,6 +50,8 @@ QVariant port_table_model::data(const QModelIndex &index, int role) const {
 }
 QVariant port_table_model::headerData(int section, Qt::Orientation orientation, int role) const { 
 	if (role == Qt::DisplayRole) { 
+		if (orientation == Qt::Vertical) 
+			return section + 1;
 		switch (section) { 
 			case column::plot_icon: { 
 				return "line"; break;
@@ -67,12 +69,31 @@ QVariant port_table_model::headerData(int section, Qt::Orientation orientation, 
 	return QVariant();
 }
 
-void port_table_model::add_port(QSerialPort* p) {
+void port_table_model::add_port(const port_spec& port) {
 	beginInsertRows(QModelIndex(), m_ports.size(), m_ports.size());
 
-	m_ports.push_back(std::unique_ptr<QSerialPort>(p));
+	auto sp = new QSerialPort;
+
+	sp->setPortName(port.name);
+	switch (port.data_bits) { 
+		case 5: {sp->setDataBits(QSerialPort::DataBits::Data5); break; }
+		case 6: {sp->setDataBits(QSerialPort::DataBits::Data6); break; }
+		case 7: {sp->setDataBits(QSerialPort::DataBits::Data7); break; }
+		case 8: {sp->setDataBits(QSerialPort::DataBits::Data8); break; }
+	}
+	switch (port.stop_bits) { 
+		case 1: {sp->setStopBits(QSerialPort::StopBits::OneStop); break; }
+		case 2: {sp->setStopBits(QSerialPort::StopBits::TwoStop); break; }
+	}
+	sp->setBaudRate(port.baud);
+	sp->open(QSerialPort::ReadOnly);
+
+
+	m_ports.push_back(std::unique_ptr<QSerialPort>(sp));
 
 	endInsertRows();
 }
+
+port_table_model::port_list& port_table_model::ports() { return m_ports; };
 
 }

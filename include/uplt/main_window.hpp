@@ -41,7 +41,6 @@ private:
 	QLineEdit* m_transform_line_edit = new QLineEdit("x");
 	QCustomPlot* m_plot = new QCustomPlot;
 	QCPGraph* m_graph = nullptr;
-	QSerialPort* m_port = new QSerialPort;
 
 	bool m_is_plotting = false;
 	uint64_t m_t = 0;

@@ -8,6 +8,8 @@
 #include <memory>
 #include <vector>
 
+#include <uplt/port_spec.hpp>
+
 namespace uplt { 
 
 class port_table_model: public QAbstractTableModel { 
@@ -34,7 +36,8 @@ public:
 		columns
 	};
 
-	void add_port(QSerialPort* port);
+	void add_port(const port_spec& port);
+	port_list& ports();
 
 protected:
 	port_list m_ports;

@@ -36,6 +36,7 @@ target_sources(uplt
 		include/uplt/main_window.hpp
 		include/uplt/port_table_model.hpp
 		include/uplt/port_table_view.hpp
+		include/uplt/port_spec.hpp
 )
 
 target_link_libraries(uplt PRIVATE

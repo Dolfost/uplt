@@ -58,16 +58,10 @@ MainWindow::MainWindow(
 	hlay->addWidget(m_clear_button);
 	hlay->addWidget(m_start_stop_button);
 
-	m_port->setBaudRate(9600);
-	m_port->setDataBits(QSerialPort::Data8);
-	m_port->setStopBits(QSerialPort::OneStop);
-	m_port->setPortName("/dev/cu.usbserial-1120");
-	m_port->open(QSerialPort::ReadOnly);
-
-	m_ports->add_port(m_port);
+	m_ports->add_port({ "/dev/cu.usbserial-1120"});
 	
 	connect(
-		m_port, &QSerialPort::readyRead,
+		m_ports->ports()[0].get(), &QSerialPort::readyRead,
 		this, &MainWindow::append_sample 
 	);
 }
@@ -82,9 +76,9 @@ void MainWindow::append_sample() {
 
 	QCPGraphData data;
 
-	while (not m_port->atEnd()) { 
+	while (not m_ports->ports()[0]->atEnd()) { 
 		uint8_t sample;
-		m_port->read(reinterpret_cast<char*>(&sample), 1);
+		m_ports->ports()[0]->read(reinterpret_cast<char*>(&sample), 1);
 		x = sample;
 		m_graph->addData(m_t++, m_expression.value());
 		qDebug() << QString("%1, %2").arg(m_t - 1).arg(sample);
@@ -103,7 +97,7 @@ void MainWindow::start_stop_button_pressed() {
 		m_start_stop_button->setText("Start");
 		m_is_plotting = false;
 	} else {
-		m_port->flush();
+		m_ports->ports()[0]->flush();
 		m_start_stop_button->setText("Stop");
 		m_is_plotting = true;
 	}
