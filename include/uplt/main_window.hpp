@@ -53,6 +53,7 @@ private:
 	QCustomPlot* m_plot = new QCustomPlot;
 	QTextEdit* m_messages = new QTextEdit;
 	QSplitter* m_table_message_splitter = new QSplitter(Qt::Vertical);
+	QSplitter* m_graph_table_splitter = new QSplitter(Qt::Horizontal);
 	QAction* m_start_stop_action = nullptr;
 
 	bool m_is_plotting = false;

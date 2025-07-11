@@ -26,8 +26,7 @@ MainWindow::MainWindow(
 	m_plot->setAutoAddPlottableToLegend(true);
 	m_plot->setInteractions(QCP::iRangeZoom | QCP::iRangeDrag);
 
-	auto splitter = new QSplitter(Qt::Horizontal);
-	splitter->addWidget(m_plot);
+	m_graph_table_splitter->addWidget(m_plot);
 
 	auto table_message_widget = new QWidget;
 	table_message_widget->setLayout(new QVBoxLayout);
@@ -38,10 +37,10 @@ MainWindow::MainWindow(
 	m_table_message_splitter->addWidget(table);
 	m_table_message_splitter->addWidget(m_messages);
 	m_table_message_splitter->setSizes({1, 0});
-	splitter->addWidget(table_message_widget);
-	m_lay->addWidget(splitter);
-	splitter->setStretchFactor(0, 1);
-	splitter->setStretchFactor(1, 0);
+	m_graph_table_splitter->addWidget(table_message_widget);
+	m_lay->addWidget(m_graph_table_splitter);
+	m_graph_table_splitter->setStretchFactor(0, 1);
+	m_graph_table_splitter->setStretchFactor(1, 0);
 
 	m_messages->setPlaceholderText("Messages will appear here");
 	m_messages->setReadOnly(true);
@@ -142,6 +141,8 @@ void MainWindow::show_message(const QString& msg) {
 	if (not m_table_message_splitter->sizes()[1]) {
 		m_table_message_splitter->setSizes({3, 1});
 		m_messages->verticalScrollBar()->setValue(m_messages->verticalScrollBar()->maximum());
+		if (not m_graph_table_splitter->sizes()[1])
+			m_graph_table_splitter->setSizes({3, 1});
 	}
 	m_messages->append(QString("%1: %2").arg(QDateTime::currentDateTime().time().toString()).arg(msg));
 }
