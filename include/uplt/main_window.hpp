@@ -23,18 +23,24 @@ class MainWindow: public QMainWindow {
 	MainWindow(QWidget* parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
 
 protected slots:
+	void clear_timeline_action();
+	void start_stop_action();
+	void set_graph_following_action(bool state);
+	void request_port_registration_action();
+
+protected slots:
 	void process_input_samples(port* pt);
-	void clear_timeline();
-	void start_stop_button_pressed();
-	void request_port_registration();
 
 protected slots:
 	void register_port(port*);
 	void unregister_port(port*);
-	void show_message(const QString& msg);
 
-protected slots: // show_message concretization
-	void message_serial_port_error_string(const QSerialPort*);
+protected slots:
+	void show_message(const QString& msg);
+	void message_serial_port_error_string(QSerialPort*);
+
+private:
+	void setup_menubar();
 
 private:
 	QVBoxLayout* m_lay = new QVBoxLayout;
@@ -45,13 +51,11 @@ private:
 	exprtk::parser<double> m_parser;
 	double x;
 
-	QPushButton* m_start_stop_button = new QPushButton;
-	QPushButton* m_clear_button = new QPushButton;
-	QPushButton* m_add_port_button = new QPushButton;
 	QLineEdit* m_transform_line_edit = new QLineEdit("x");
 	QCustomPlot* m_plot = new QCustomPlot;
-	QCPGraph* m_graph = nullptr;
 	QTextEdit* m_messages = new QTextEdit;
+	QSplitter* m_table_message_splitter = new QSplitter(Qt::Vertical);
+	QAction* m_start_stop_action = nullptr;
 
 	bool m_is_plotting = false;
 	uint64_t m_t = 0;
