@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <uplt/port_spec.hpp>
+#include <uplt/graph.hpp>
 
 namespace uplt { 
 
@@ -16,6 +17,7 @@ struct port: public port_spec {
 	port(QSerialPort* p, const port_spec& ps): port_spec(ps), serial(p) {};
 	port() = delete;
 	std::unique_ptr<QSerialPort> serial;
+	graph* graph;
 };
 
 class port_table_model: public QAbstractTableModel { 
@@ -24,7 +26,7 @@ public:
 	using port_list = std::vector<std::unique_ptr<port>>;
 
 public:
-	void add_port(const port_spec& port);
+	void add_port(const port_spec& port, graph* graph);
 	port_list& ports();
 
 	enum column { 

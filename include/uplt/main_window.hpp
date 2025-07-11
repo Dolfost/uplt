@@ -22,11 +22,15 @@ class MainWindow: public QMainWindow {
 	public:
 	MainWindow(QWidget* parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags());
 
-private slots:
+protected slots:
 	void process_input_samples(port* pt);
 	void clear_timeline();
 	void start_stop_button_pressed();
-	void add_port();
+	void request_port_registration();
+
+protected slots:
+	void register_port(port*);
+	void unregister_port(port*);
 
 private:
 	QVBoxLayout* m_lay = new QVBoxLayout;
@@ -43,6 +47,7 @@ private:
 	QLineEdit* m_transform_line_edit = new QLineEdit("x");
 	QCustomPlot* m_plot = new QCustomPlot;
 	QCPGraph* m_graph = nullptr;
+	QTextEdit* m_messages = new QTextEdit;
 
 	bool m_is_plotting = false;
 	uint64_t m_t = 0;

@@ -28,7 +28,7 @@ MainWindow::MainWindow(
 	);
 	connect(
 		m_add_port_button, &QPushButton::pressed, 
-		this, &MainWindow::add_port 
+		this, &MainWindow::request_port_registration 
 	);
 	connect(
 		m_clear_button, &QPushButton::pressed, 
@@ -46,9 +46,14 @@ MainWindow::MainWindow(
 	auto splitter = new QSplitter(Qt::Horizontal);
 	splitter->addWidget(m_plot);
 
+	auto table_message_widget = new QWidget;
+	table_message_widget->setLayout(new QVBoxLayout);
+	table_message_widget->layout()->setContentsMargins(0,0,0,0);
 	auto table = new uplt::port_table_view;
 	table->setModel(m_ports);
-	splitter->addWidget(table);
+	table_message_widget->layout()->addWidget(table);
+	table_message_widget->layout()->addWidget(m_messages);
+	splitter->addWidget(table_message_widget);
 	m_lay->addWidget(splitter);
 
 	connect( 
@@ -71,14 +76,11 @@ MainWindow::MainWindow(
 
 	connect(
 		m_ports, &port_table_model::port_added,
-		[&](port* port) {
-			if (not port->serial->isOpen())
-				return;
-			connect( 
-				port->serial.get(), &QSerialPort::readyRead,
-				[this, port]() { process_input_samples(port); }
-			);
-		}
+		this, &MainWindow::register_port
+	);
+	connect(
+		m_ports, &port_table_model::port_removed,
+		this, &MainWindow::unregister_port
 	);
 }
 
@@ -89,11 +91,11 @@ void MainWindow::process_input_samples(port* pt) {
 	if (not m_parser.compile(m_transform_line_edit->text().toStdString(), m_expression))
 		return;
 
+	uint8_t sample;
 	while (not pt->serial->atEnd()) { 
-		uint8_t sample;
 		pt->serial->read(reinterpret_cast<char*>(&sample), 1);
 		x = sample;
-		m_graph->addData(m_t++, m_expression.value());
+		pt->graph->addData(m_t++, m_expression.value());
 		qDebug() << QString("%1: %2, %3").arg(pt->name).arg(m_t - 1).arg(sample);
 	}
 
@@ -101,7 +103,9 @@ void MainWindow::process_input_samples(port* pt) {
 }
 
 void MainWindow::clear_timeline() { 
-	m_graph->data()->clear();
+	for (auto& p: m_ports->ports()) {
+		p->graph->data()->clear();
+	}
 	m_t = 0;
 	m_plot->replot();
 }
@@ -117,12 +121,22 @@ void MainWindow::start_stop_button_pressed() {
 	}
 }
 
-void MainWindow::add_port() {
+void MainWindow::request_port_registration() {
 	auto dialog = new uplt::port_spec_dialog(this);
 	dialog->exec();
 	if (dialog->result() == QDialog::Accepted)
-		m_ports->add_port(dialog->spec());
+		m_ports->add_port(dialog->spec(), new graph(m_plot->xAxis, m_plot->yAxis));
 	delete dialog;
+}
+
+void MainWindow::register_port(port* p) {
+	connect( 
+		p->serial.get(), &QSerialPort::readyRead,
+		[this, p]() { process_input_samples(p); }
+	);
+}
+
+void MainWindow::unregister_port(port* p) {
 }
 
 }

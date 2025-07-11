@@ -27,33 +27,36 @@ QVariant port_table_model::data(const QModelIndex &index, int role) const {
 	switch (role) {
 		case Qt::DisplayRole: {
 			switch (index.column()) { 
-				case column::plot_icon: {
-					return QPixmap(100, 100); break; 
-				} case column::name: {
+				case column::plot_icon: return QVariant();
+				case column::name:
 					if (p.serial->isOpen()) {
 						if (not p.alias.empty())
 							return QString::fromStdString(p.alias);
 						return p.serial->portName();
 					}
 					return QString("<unavailable>");
-				} case column::data_bits: { 
+				case column::data_bits:
 					return p.serial->dataBits();
-				} case column::stop_bits: { 
+				case column::stop_bits:
 					return p.serial->stopBits();
-				} case column::baud: { 
+				case column::baud:
 					return p.serial->baudRate();
-				}
-			break; }
+			}
 		} case Qt::ToolTipRole: {
 			switch (index.column()) {
-				case column::name: {
+				case column::name:
 					if (not p.serial->isOpen())
 						return QString::fromStdString(p.name);
 					if (not p.alias.empty()) 
 						return QString::fromStdString(p.alias);
-				}
 			}
-		break; }
+		} case Qt::DecorationRole: {
+			switch (index.column())
+				case column::plot_icon: return p.graph->legend_icon({30, 15});
+		} case Qt::TextAlignmentRole: {
+			switch (index.column())
+				case column::plot_icon: return Qt::AlignCenter;
+		}
 	}
 
 	return QVariant();
@@ -80,7 +83,7 @@ QVariant port_table_model::headerData(int section, Qt::Orientation orientation, 
 	return QVariant();
 }
 
-void port_table_model::add_port(const port_spec& ps) {
+void port_table_model::add_port(const port_spec& ps, graph* graph) {
 	beginInsertRows(QModelIndex(), m_ports.size(), m_ports.size());
 
 	auto sp = new QSerialPort;
@@ -99,7 +102,9 @@ void port_table_model::add_port(const port_spec& ps) {
 	sp->setBaudRate(ps.baud);
 	sp->open(QSerialPort::ReadOnly);
 
-	m_ports.push_back(std::move(std::make_unique<port>(port(sp, ps))));
+	auto p = std::make_unique<port>(port(sp, ps));
+	p->graph = graph;
+	m_ports.push_back(std::move(p));
 
 	endInsertRows();
 	emit port_added(m_ports.back().get());
