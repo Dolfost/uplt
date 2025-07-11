@@ -49,12 +49,17 @@ MainWindow::MainWindow(
 	auto table_message_widget = new QWidget;
 	table_message_widget->setLayout(new QVBoxLayout);
 	table_message_widget->layout()->setContentsMargins(0,0,0,0);
+	auto table_message_splitter = new QSplitter(Qt::Vertical);
+	table_message_widget->layout()->addWidget(table_message_splitter);
 	auto table = new uplt::port_table_view;
 	table->setModel(m_ports);
-	table_message_widget->layout()->addWidget(table);
-	table_message_widget->layout()->addWidget(m_messages);
+	table_message_splitter->addWidget(table);
+	table_message_splitter->addWidget(m_messages);
 	splitter->addWidget(table_message_widget);
 	m_lay->addWidget(splitter);
+
+	m_messages->setPlaceholderText("Messages will appear here");
+	m_messages->setReadOnly(true);
 
 	connect( 
 		m_ports, &QAbstractItemModel::rowsInserted, 
@@ -124,8 +129,11 @@ void MainWindow::start_stop_button_pressed() {
 void MainWindow::request_port_registration() {
 	auto dialog = new uplt::port_spec_dialog(this);
 	dialog->exec();
-	if (dialog->result() == QDialog::Accepted)
+	if (dialog->result() == QDialog::Accepted) {
 		m_ports->add_port(dialog->spec(), new graph(m_plot->xAxis, m_plot->yAxis));
+		if (not m_ports->ports().back()->serial->isOpen())
+			message_serial_port_error_string(m_ports->ports().back()->serial.get());
+	}
 	delete dialog;
 }
 
@@ -134,9 +142,21 @@ void MainWindow::register_port(port* p) {
 		p->serial.get(), &QSerialPort::readyRead,
 		[this, p]() { process_input_samples(p); }
 	);
+	connect( 
+		p->serial.get(), &QSerialPort::errorOccurred,
+		[this, p]() { message_serial_port_error_string(p->serial.get()); }
+	);
 }
 
 void MainWindow::unregister_port(port* p) {
+}
+
+void MainWindow::show_message(const QString& msg) {
+	m_messages->append(QString("%1: %2").arg(QDateTime::currentDateTime().time().toString()).arg(msg));
+}
+
+void MainWindow::message_serial_port_error_string(const QSerialPort* sp) {
+	show_message(QString("%1: %2").arg(sp->portName()).arg(sp->errorString()));
 }
 
 }

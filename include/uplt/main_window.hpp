@@ -31,6 +31,10 @@ protected slots:
 protected slots:
 	void register_port(port*);
 	void unregister_port(port*);
+	void show_message(const QString& msg);
+
+protected slots: // show_message concretization
+	void message_serial_port_error_string(const QSerialPort*);
 
 private:
 	QVBoxLayout* m_lay = new QVBoxLayout;

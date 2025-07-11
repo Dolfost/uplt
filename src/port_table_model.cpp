@@ -27,7 +27,6 @@ QVariant port_table_model::data(const QModelIndex &index, int role) const {
 	switch (role) {
 		case Qt::DisplayRole: {
 			switch (index.column()) { 
-				case column::plot_icon: return QVariant();
 				case column::name:
 					if (p.serial->isOpen()) {
 						if (not p.alias.empty())
@@ -49,6 +48,9 @@ QVariant port_table_model::data(const QModelIndex &index, int role) const {
 						return QString::fromStdString(p.name);
 					if (not p.alias.empty()) 
 						return QString::fromStdString(p.alias);
+				case column::data_bits: return "data bits";
+				case column::stop_bits: return "stop bits";
+				case column::baud: return "baud rate";
 			}
 		} case Qt::DecorationRole: {
 			switch (index.column())
