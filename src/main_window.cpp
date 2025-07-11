@@ -22,7 +22,6 @@ MainWindow::MainWindow(
 
 	m_transformation_symbol_table.add_pi();
 	m_transformation_symbol_table.add_variable("x", x);
-	m_expression.register_symbol_table(m_transformation_symbol_table);
 
 	m_plot->setAutoAddPlottableToLegend(true);
 	m_plot->setInteractions(QCP::iRangeZoom | QCP::iRangeDrag);
@@ -73,21 +72,32 @@ void MainWindow::process_input_samples(port* pt) {
 		return;
 
 	uint8_t sample;
+	auto before_x = pt->sample_no;
+	double before_y; 
+	if (pt->graph->data()->end() != pt->graph->data()->begin())
+		before_y = (*(pt->graph->data()->end())).mainValue();
+	else 
+		before_y = 0;
 	while (not pt->serial->atEnd()) { 
 		pt->serial->read(reinterpret_cast<char*>(&sample), 1);
 		x = sample;
-		pt->graph->addData(m_t++, m_expression.value());
-		qDebug() << QString("%1: %2, %3").arg(pt->name).arg(m_t - 1).arg(sample);
+		pt->graph->addData(pt->sample_no++, sample);
+		qDebug() << QString("%1: %2, %3").arg(pt->name).arg(pt->sample_no - 1).arg(sample);
 	}
 
 	m_plot->replot();
+
+	if (m_follow_graph) { 
+    double width = m_plot->xAxis->range().size();
+    m_plot->xAxis->setRange(pt->sample_no - width, pt->sample_no);
+	}
 }
 
 void MainWindow::clear_timeline_action() { 
 	for (auto& p: m_ports->ports()) {
 		p->graph->data()->clear();
+		p->sample_no = 0;
 	}
-	m_t = 0;
 	m_plot->replot();
 }
 
@@ -141,6 +151,7 @@ void MainWindow::message_serial_port_error_string(QSerialPort* sp) {
 }
 
 void MainWindow::set_graph_following_action(bool state) {
+	m_follow_graph = state;
 }
 
 void MainWindow::setup_menubar() {

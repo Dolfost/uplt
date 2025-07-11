@@ -47,7 +47,6 @@ private:
 	QWidget* m_central_widget = new QWidget;
 
 	exprtk::symbol_table<double> m_transformation_symbol_table;
-	exprtk::expression<double> m_expression;
 	exprtk::parser<double> m_parser;
 	double x;
 
@@ -57,7 +56,7 @@ private:
 	QAction* m_start_stop_action = nullptr;
 
 	bool m_is_plotting = false;
-	uint64_t m_t = 0;
+	bool m_follow_graph = false;
 
 	uplt::port_table_model* m_ports = new uplt::port_table_model;
 };
