@@ -46,12 +46,11 @@ private:
 	QVBoxLayout* m_lay = new QVBoxLayout;
 	QWidget* m_central_widget = new QWidget;
 
-	exprtk::symbol_table<double> m_expression_symbols;
+	exprtk::symbol_table<double> m_transformation_symbol_table;
 	exprtk::expression<double> m_expression;
 	exprtk::parser<double> m_parser;
 	double x;
 
-	QLineEdit* m_transform_line_edit = new QLineEdit("x");
 	QCustomPlot* m_plot = new QCustomPlot;
 	QTextEdit* m_messages = new QTextEdit;
 	QSplitter* m_table_message_splitter = new QSplitter(Qt::Vertical);

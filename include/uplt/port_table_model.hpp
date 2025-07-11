@@ -3,7 +3,9 @@
 
 #include <QAbstractTableModel>
 #include <QSerialPort>
+
 #include <qcustomplot.h>
+#include <exprtk.hpp>
 
 #include <memory>
 #include <vector>
@@ -17,6 +19,8 @@ struct port: public port_spec {
 	port(QSerialPort* p, const port_spec& ps): port_spec(ps), serial(p) {};
 	port() = delete;
 	std::unique_ptr<QSerialPort> serial;
+	exprtk::expression<double> expression;
+	std::string expression_str = "x";
 	graph* graph;
 };
 
@@ -35,6 +39,7 @@ public:
 		data_bits,
 		stop_bits,
 		baud,
+		transform_expression,
 		columns
 	};
 

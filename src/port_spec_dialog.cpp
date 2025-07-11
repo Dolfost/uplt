@@ -6,6 +6,7 @@
 #include <QLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMessageBox>
 
 namespace uplt {
 
@@ -64,7 +65,7 @@ port_spec_dialog::port_spec_dialog(QWidget *parent, Qt::WindowFlags f) {
 		baud, &QSpinBox::valueChanged,
 		[&, baud]() { m_spec.baud = baud->value(); } 
 	);
-	baud->setPrefix("BAUD ");
+	baud->setPrefix("Baud ");
 	data_stop_baud_lay->addWidget(baud);
 
 
@@ -78,7 +79,13 @@ port_spec_dialog::port_spec_dialog(QWidget *parent, Qt::WindowFlags f) {
 	confirm->setDefault(true);
 	connect( 
 		confirm, &QPushButton::pressed,
-		this, &port_spec_dialog::accept
+		[this, name_text]() {
+			if (name_text->text().isEmpty()) {
+				QMessageBox::critical(this, "No port name", "Port name can not be empty");
+				return;
+			}
+			accept();
+		}
 	);
 	connect( 
 		cancel, &QPushButton::pressed,

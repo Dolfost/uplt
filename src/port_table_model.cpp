@@ -40,6 +40,8 @@ QVariant port_table_model::data(const QModelIndex &index, int role) const {
 					return p.serial->stopBits();
 				case column::baud:
 					return p.serial->baudRate();
+				case column::transform_expression:
+					return QString::fromStdString(p.expression_str);
 			}
 		} case Qt::ToolTipRole: {
 			switch (index.column()) {
@@ -51,6 +53,7 @@ QVariant port_table_model::data(const QModelIndex &index, int role) const {
 				case column::data_bits: return "data bits";
 				case column::stop_bits: return "stop bits";
 				case column::baud: return "baud rate";
+				case column::transform_expression: return "signal transformation expression";
 			}
 		} case Qt::DecorationRole: {
 			switch (index.column())
@@ -69,17 +72,12 @@ QVariant port_table_model::headerData(int section, Qt::Orientation orientation, 
 		if (orientation == Qt::Vertical) 
 			return section + 1;
 		switch (section) { 
-			case column::plot_icon: { 
-				return "line";
-			} case column::name: { 
-				return "name";
-			} case column::data_bits: { 
-				return "db";
-			} case column::stop_bits: { 
-				return "sb";
-			} case column::baud: { 
-				return "baud";
-			} 
+			case column::plot_icon: return "line";
+			case column::name: return "name";
+			case column::data_bits: return "db";
+			case column::stop_bits: return "sb";
+			case column::baud: return "baud";
+			case column::transform_expression: return "sig(x)";
 		}
 	}
 	return QVariant();

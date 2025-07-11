@@ -20,9 +20,9 @@ MainWindow::MainWindow(
 	m_central_widget->setLayout(m_lay);
 	setCentralWidget(m_central_widget);
 
-	m_expression_symbols.add_pi();
-	m_expression_symbols.add_variable("x", x);
-	m_expression.register_symbol_table(m_expression_symbols);
+	m_transformation_symbol_table.add_pi();
+	m_transformation_symbol_table.add_variable("x", x);
+	m_expression.register_symbol_table(m_transformation_symbol_table);
 
 	m_plot->setAutoAddPlottableToLegend(true);
 	m_plot->setInteractions(QCP::iRangeZoom | QCP::iRangeDrag);
@@ -57,10 +57,6 @@ MainWindow::MainWindow(
 	);
 
 	auto hlay = new QHBoxLayout;
-	hlay->setContentsMargins(10,0,10,10);
-	m_lay->addLayout(hlay);
-	hlay->addWidget(new QLabel("y(x) = "));
-	hlay->addWidget(m_transform_line_edit);
 
 	connect(
 		m_ports, &port_table_model::port_added,
@@ -74,9 +70,6 @@ MainWindow::MainWindow(
 
 void MainWindow::process_input_samples(port* pt) { 
 	if (not m_is_plotting)
-		return;
-
-	if (not m_parser.compile(m_transform_line_edit->text().toStdString(), m_expression))
 		return;
 
 	uint8_t sample;
@@ -129,6 +122,7 @@ void MainWindow::register_port(port* p) {
 		p->serial.get(), &QSerialPort::errorOccurred,
 		[this, p]() { message_serial_port_error_string(p->serial.get()); }
 	);
+	p->expression.register_symbol_table(m_transformation_symbol_table);
 }
 
 void MainWindow::unregister_port(port* p) {
