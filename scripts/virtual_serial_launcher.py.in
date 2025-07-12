@@ -1,0 +1,76 @@
+#!/usr/bin/env python
+
+import os
+import pty
+import math
+import time
+import signal
+import threading
+
+LINK_DIR = "@UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY@"
+
+WAVES = {
+    "SINE": lambda t: int((math.sin(t) + 1) * 127.5),
+    "SQUARE": lambda t: 255 if math.sin(t) > 0 else 0,
+    "RAMP": lambda t: int((t * 32) % 256),
+}
+
+running = True
+threads = []
+masters = []
+
+# ensure symlink directory exists
+os.makedirs(LINK_DIR, exist_ok=True)
+
+# clean up old symlinks
+for name in os.listdir(LINK_DIR):
+    path = os.path.join(LINK_DIR, name)
+    if os.path.islink(path):
+        os.unlink(path)
+
+def signal_handler(sig, frame):
+    global running
+    print("\nStopping...")
+    running = False
+
+signal.signal(signal.SIGINT, signal_handler)
+
+def create_named_pty(name):
+    master_fd, slave_fd = pty.openpty()
+    slave_name = os.ttyname(slave_fd)
+    symlink_path = os.path.join(LINK_DIR, name)
+    os.symlink(slave_name, symlink_path)
+    print(f"{name:7} → {symlink_path} → {slave_name}")
+    return master_fd
+
+def stream_wave(master_fd, wave_fn, label):
+    t = 0.0
+    while running:
+        value = wave_fn(t)
+        os.write(master_fd, bytes([value]))
+        # print(f"{label} sent: {value}")
+        t += 0.1
+        time.sleep(0.1)
+
+def main():
+    print("Creating PTYs...\n")
+
+    for name, wave_fn in WAVES.items():
+        master_fd = create_named_pty(name)
+        masters.append(master_fd)
+        thread = threading.Thread(target=stream_wave, args=(master_fd, wave_fn, name), daemon=True)
+        thread.start()
+        threads.append(thread)
+
+    print("\nPress Ctrl+C to stop...\n")
+    try:
+        while running:
+            time.sleep(0.5)
+    finally:
+        for fd in masters:
+            os.close(fd)
+        print("Cleaned up.")
+
+if __name__ == "__main__":
+    main()
+

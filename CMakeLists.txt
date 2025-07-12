@@ -23,6 +23,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(exprtk)
 
+set(UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/virtual_tty/)
+
 qt_standard_project_setup()
 
 qt_add_executable(uplt)
@@ -34,7 +36,8 @@ target_sources(uplt
 		src/port_table_view.cpp
 		src/port_spec_dialog.cpp
 		src/graph.cpp
-	PUBLIC FILE_SET HEADERS BASE_DIRS include/ FILES
+	PUBLIC FILE_SET HEADERS 
+	BASE_DIRS include/ FILES
 		include/uplt/main_window.hpp
 		include/uplt/port_table_model.hpp
 		include/uplt/port_table_view.hpp
@@ -42,9 +45,19 @@ target_sources(uplt
 		include/uplt/port_spec_dialog.hpp
 		include/uplt/graph.hpp
 )
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	target_compile_definitions(uplt 
+		PRIVATE 
+			UPLT_DEBUG
+			UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY="${UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY}"
+	)
+endif()
 
 target_link_libraries(uplt PRIVATE
 	Qt6::Core Qt6::Widgets Qt6::Gui 
 	Qt6::PrintSupport Qt6::SerialPort
 	exprtk::exprtk qcustomplot
 )
+
+
+add_subdirectory(scripts)

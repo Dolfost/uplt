@@ -64,6 +64,12 @@ MainWindow::MainWindow(
 		m_ports, &port_table_model::port_removed,
 		this, &MainWindow::unregister_port
 	);
+
+#ifdef UPLT_DEBUG 
+	m_ports->add_port({UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY "/SINE"}, new graph(m_plot->xAxis, m_plot->yAxis));
+	m_ports->add_port({UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY "/SQUARE"}, new graph(m_plot->xAxis, m_plot->yAxis));
+	m_ports->add_port({UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY "/RAMP"}, new graph(m_plot->xAxis, m_plot->yAxis));
+#endif
 }
 
 void MainWindow::process_input_samples(port* pt) { 
