@@ -29,9 +29,10 @@ public:
 	}
 };
 
-
 port_table_view::port_table_view() { 
 	setSelectionBehavior(QAbstractItemView::SelectRows);
+	setSelectionMode(QAbstractItemView::SingleSelection);
+
 	resizeColumnsToContents();
 	resizeRowsToContents();
 	horizontalHeader()->setStretchLastSection(true);
@@ -51,25 +52,35 @@ void port_table_view::show_context_menu(const QPoint& pos) {
 
 	auto menu = new QMenu;
 	port* p = static_cast<port_table_model*>(model())->ports()[index.row()].get();
+	const std::size_t row = index.row();
 	menu->setAttribute(Qt::WA_DeleteOnClose);
 	using namespace std::placeholders;
 	connect( 
 		menu->addAction("Edit"), &QAction::triggered, 
-		this, std::bind(&port_table_view::edit_action, this, p)
+		this, std::bind(&port_table_view::edit_action, this, p, row)
 	);
 	connect( 
 		menu->addAction("Delete"), &QAction::triggered, 
-		this, std::bind(&port_table_view::delete_action, this, p)
+		this, std::bind(&port_table_view::delete_action, this, p, row)
 	);
 
 	menu->popup(viewport()->mapToGlobal(pos));
 }
 
-void port_table_view::edit_action(port* p) {
+void port_table_view::edit_action(port* p, std::size_t row) {
+	auto dialog = new port_spec_dialog();
+	dialog->setAttribute(Qt::WA_DeleteOnClose);
+	dialog->set_spec(*static_cast<port_spec*>(p));
+	dialog->setWindowTitle(QString("Editing port %1").arg(p->alias.size() != 0 ? p->alias : p->name));
+	connect(
+		dialog, &QDialog::accepted,
+		[=]() { static_cast<port_table_model*>(model())->update_port(p, dialog->spec()); }
+	);
+	dialog->show();
 }
 
-void port_table_view::delete_action(port* p) {
-	// auto dialog = new port_spec_dialog();
+void port_table_view::delete_action(port* p, std::size_t row) {
+	model()->removeRow(row);
 }
 
 }

@@ -16,8 +16,8 @@ protected slots:
 	void show_context_menu(const QPoint& pos);
 
 protected slots:
-	void edit_action(port* p);
-	void delete_action(port* p);
+	void edit_action(port* p, std::size_t row);
+	void delete_action(port* p, std::size_t row);
 
 };
 

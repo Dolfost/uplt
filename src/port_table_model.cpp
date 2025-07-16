@@ -5,6 +5,8 @@ namespace uplt {
 bool port_table_model::removeRows(int row, int count, const QModelIndex &parent) {
 	beginRemoveRows(parent, row, row + count - 1);
 
+	for (auto beg = m_ports.begin() + row; beg < m_ports.begin() + row + count; beg++)
+		emit port_removed(beg->get());
 	m_ports.erase(m_ports.begin() + row, m_ports.begin() + row + count);
 
 	endRemoveRows();
@@ -83,27 +85,13 @@ QVariant port_table_model::headerData(int section, Qt::Orientation orientation, 
 	return QVariant();
 }
 
-void port_table_model::add_port(const port_spec& ps, graph* graph) {
+void port_table_model::add_port(const port_spec& spec, graph* graph) {
 	beginInsertRows(QModelIndex(), m_ports.size(), m_ports.size());
 
-	auto sp = new QSerialPort;
-
-	sp->setPortName(QString::fromStdString(ps.name));
-	switch (ps.data_bits) { 
-		case 5: { sp->setDataBits(QSerialPort::DataBits::Data5); break; }
-		case 6: { sp->setDataBits(QSerialPort::DataBits::Data6); break; }
-		case 7: { sp->setDataBits(QSerialPort::DataBits::Data7); break; }
-		case 8: { sp->setDataBits(QSerialPort::DataBits::Data8); break; }
-	}
-	switch (ps.stop_bits) { 
- 		case 1: { sp->setStopBits(QSerialPort::StopBits::OneStop); break; }
-		case 2: { sp->setStopBits(QSerialPort::StopBits::TwoStop); break; }
-	}
-	sp->setBaudRate(ps.baud);
-	sp->open(QSerialPort::ReadOnly);
-
-	auto p = std::make_unique<port>(port(sp, ps));
+	auto p = std::make_unique<port>(port(new QSerialPort, spec));
 	p->graph = graph;
+	p->apply_settings_to_serial_port();
+	p->serial->open(QSerialPort::ReadOnly);
 	m_ports.push_back(std::move(p));
 
 	endInsertRows();
@@ -111,5 +99,20 @@ void port_table_model::add_port(const port_spec& ps, graph* graph) {
 }
 
 port_table_model::port_list& port_table_model::ports() { return m_ports; };
+
+void port_table_model::update_port(port* p, const port_spec& spec) {
+	auto pt = std::find_if(m_ports.begin(), m_ports.end(), [=](auto& l) { return l.get() == p; });
+	if (pt == m_ports.end()) 
+		return;
+	*static_cast<port_spec*>(pt->get()) = spec;
+	(*pt)->serial->close();
+	(*pt)->apply_settings_to_serial_port();
+	(*pt)->serial->open(QSerialPort::ReadOnly);
+	const auto row = std::distance(m_ports.begin(), pt);
+	emit dataChanged(
+		index(row, 0), 
+		index(row, column::columns+10)
+	);
+}
 
 }

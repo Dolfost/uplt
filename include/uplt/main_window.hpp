@@ -24,7 +24,7 @@ class MainWindow: public QMainWindow {
 
 protected slots:
 	void clear_timeline_action();
-	void start_stop_action();
+	void start_stop_plotting_action();
 	void set_graph_following_action(bool state);
 	void request_port_registration_action();
 

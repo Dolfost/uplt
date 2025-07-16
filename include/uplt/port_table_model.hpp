@@ -24,6 +24,20 @@ struct port: public port_spec {
 	exprtk::expression<double> expression;
 	std::string expression_str = "x";
 	graph* graph;
+	void apply_settings_to_serial_port() {
+		serial->setPortName(QString::fromStdString(name));
+		serial->setBaudRate(baud);
+		switch (data_bits) { 
+			case 5: { serial->setDataBits(QSerialPort::DataBits::Data5); break; }
+			case 6: { serial->setDataBits(QSerialPort::DataBits::Data6); break; }
+			case 7: { serial->setDataBits(QSerialPort::DataBits::Data7); break; }
+			case 8: { serial->setDataBits(QSerialPort::DataBits::Data8); break; }
+		}
+		switch (stop_bits) { 
+			case 1: { serial->setStopBits(QSerialPort::StopBits::OneStop); break; }
+			case 2: { serial->setStopBits(QSerialPort::StopBits::TwoStop); break; }
+		}
+	}
 };
 
 class port_table_model: public QAbstractTableModel { 
@@ -32,7 +46,8 @@ public:
 	using port_list = std::vector<std::unique_ptr<port>>;
 
 public:
-	void add_port(const port_spec& port, graph* graph);
+	void add_port(const port_spec& spec, graph* graph);
+	void update_port(port* p, const port_spec& spec);
 	port_list& ports();
 
 	enum column { 

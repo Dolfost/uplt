@@ -65,10 +65,14 @@ MainWindow::MainWindow(
 		this, &MainWindow::unregister_port
 	);
 
+	m_plot->xAxis->setRange(0, 2000);
+	m_plot->yAxis->setRange(-5, 260);
+
 #ifdef UPLT_DEBUG 
-	m_ports->add_port({UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY "/SINE"}, new graph(m_plot->xAxis, m_plot->yAxis));
-	m_ports->add_port({UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY "/SQUARE"}, new graph(m_plot->xAxis, m_plot->yAxis));
-	m_ports->add_port({UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY "/RAMP"}, new graph(m_plot->xAxis, m_plot->yAxis));
+	m_ports->add_port({UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY "SINE"}, new graph(m_plot->xAxis, m_plot->yAxis));
+	m_ports->add_port({UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY "SQUARE"}, new graph(m_plot->xAxis, m_plot->yAxis));
+	m_ports->add_port({UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY "RAMP"}, new graph(m_plot->xAxis, m_plot->yAxis));
+	start_stop_plotting_action();
 #endif
 }
 
@@ -106,13 +110,13 @@ void MainWindow::clear_timeline_action() {
 	m_plot->replot();
 }
 
-void MainWindow::start_stop_action() { 
+void MainWindow::start_stop_plotting_action() { 
 	if (m_is_plotting) {
-		m_start_stop_action->setText("Start");
+		m_start_stop_action->setText("Start plotting");
 		m_is_plotting = false;
 	} else {
 		m_ports->ports()[0]->serial->readAll();
-		m_start_stop_action->setText("Stop");
+		m_start_stop_action->setText("Stop plotting");
 		m_is_plotting = true;
 	}
 }
@@ -141,6 +145,7 @@ void MainWindow::register_port(port* p) {
 }
 
 void MainWindow::unregister_port(port* p) {
+	m_plot->removePlottable(p->graph);
 }
 
 void MainWindow::show_message(const QString& msg) {
@@ -154,6 +159,8 @@ void MainWindow::show_message(const QString& msg) {
 }
 
 void MainWindow::message_serial_port_error_string(QSerialPort* sp) {
+	if (sp->error() == QSerialPort::NoError)
+		return;
 	show_message(QString("%1: %2").arg(sp->portName()).arg(sp->errorString()));
 }
 
@@ -173,8 +180,8 @@ void MainWindow::setup_menubar() {
 
 	auto graph = m->addMenu("Graphs");
 	connect( 
-		(m_start_stop_action = graph->addAction("Start/Stop plotting")), &QAction::triggered,
-		this, &MainWindow::start_stop_action
+		(m_start_stop_action = graph->addAction("Plotting")), &QAction::triggered,
+		this, &MainWindow::start_stop_plotting_action
 	);
 	connect( 
 		graph->addAction("Clear timeline"), &QAction::triggered,

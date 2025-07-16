@@ -1,11 +1,8 @@
 #include <uplt/port_spec_dialog.hpp>
 
 #include <QPushButton>
-#include <QSpinBox>
-#include <QComboBox>
 #include <QLayout>
 #include <QLabel>
-#include <QLineEdit>
 #include <QMessageBox>
 
 namespace uplt {
@@ -18,55 +15,49 @@ port_spec_dialog::port_spec_dialog(QWidget *parent, Qt::WindowFlags f) {
 	auto data_stop_baud_lay = new QHBoxLayout;
 
 	name_lay->addWidget(new QLabel("Name"));
-	auto name_text = new QLineEdit;
-	name_text->setPlaceholderText("COM1 or /dev/cu.usbserial1120");
+	m_name_text->setPlaceholderText("COM1 or /dev/cu.usbserial1120");
 	connect( 
-		name_text, &QLineEdit::textEdited,
-		[&, name_text]() { m_spec.name = name_text->text().toStdString(); }
+		m_name_text, &QLineEdit::textEdited,
+		[this]() { m_spec.name = m_name_text->text().toStdString(); }
 	);
-	name_lay->addWidget(name_text);
+	name_lay->addWidget(m_name_text);
 
 	alias_lay->addWidget(new QLabel("Alias"));
-	auto alias_text = new QLineEdit;
-	alias_text->setPlaceholderText("eq. thermometer");
+	m_alias_text->setPlaceholderText("eq. thermometer");
 	connect( 
-		alias_text, &QLineEdit::textEdited,
-		[&, alias_text]() { m_spec.alias = alias_text->text().toStdString(); }
+		m_alias_text, &QLineEdit::textEdited,
+		[this]() { m_spec.alias = m_alias_text->text().toStdString(); }
 	);
-	alias_lay->addWidget(alias_text);
+	alias_lay->addWidget(m_alias_text);
 
 
-	auto data_bits = new QSpinBox;
-	data_bits->setRange(5, 8);
-	data_bits->setValue(m_spec.data_bits);
+	m_data_bits->setRange(5, 8);
 	connect( 
-		data_bits, &QSpinBox::valueChanged,
-		[&, data_bits]() { m_spec.data_bits = data_bits->value(); } 
+		m_data_bits, &QSpinBox::valueChanged,
+		[this]() { m_spec.data_bits = m_data_bits->value(); } 
 	);
-	data_bits->setPrefix("Data bits ");
-	data_stop_baud_lay->addWidget(data_bits);
+	m_data_bits->setPrefix("Data bits ");
+	data_stop_baud_lay->addWidget(m_data_bits);
 
 	data_stop_baud_lay->addSpacing(20);
 
-	auto stop_bits = new QSpinBox;
-	stop_bits->setRange(1, 2);
-	stop_bits->setValue(m_spec.stop_bits);
+	m_stop_bits->setRange(1, 2);
+	m_stop_bits->setValue(m_spec.stop_bits);
 	connect( 
-		stop_bits, &QSpinBox::valueChanged,
-		[&, stop_bits]() { m_spec.stop_bits = stop_bits->value(); } 
+		m_stop_bits, &QSpinBox::valueChanged,
+		[this]() { m_spec.stop_bits = m_stop_bits->value(); } 
 	);
-	stop_bits->setPrefix("Stop bits ");
-	data_stop_baud_lay->addWidget(stop_bits);
+	m_stop_bits->setPrefix("Stop bits ");
+	data_stop_baud_lay->addWidget(m_stop_bits);
 
-	auto baud = new QSpinBox;
-	baud->setRange(1, 999999999);
-	baud->setValue(m_spec.baud);
+	m_baud->setRange(1, 999999999);
+	m_baud->setValue(m_spec.baud);
 	connect( 
-		baud, &QSpinBox::valueChanged,
-		[&, baud]() { m_spec.baud = baud->value(); } 
+		m_baud, &QSpinBox::valueChanged,
+		[this]() { m_spec.baud = m_baud->value(); } 
 	);
-	baud->setPrefix("Baud ");
-	data_stop_baud_lay->addWidget(baud);
+	m_baud->setPrefix("Baud ");
+	data_stop_baud_lay->addWidget(m_baud);
 
 
 	auto buttons_lay = new QHBoxLayout;
@@ -79,8 +70,8 @@ port_spec_dialog::port_spec_dialog(QWidget *parent, Qt::WindowFlags f) {
 	confirm->setDefault(true);
 	connect( 
 		confirm, &QPushButton::pressed,
-		[this, name_text]() {
-			if (name_text->text().isEmpty()) {
+		[this]() {
+			if (m_name_text->text().isEmpty()) {
 				QMessageBox::critical(this, "No port name", "Port name can not be empty");
 				return;
 			}
@@ -97,6 +88,15 @@ port_spec_dialog::port_spec_dialog(QWidget *parent, Qt::WindowFlags f) {
 	main_lay->addLayout(data_stop_baud_lay);
 	main_lay->addLayout(buttons_lay);
 	setLayout(main_lay);
+}
+
+void port_spec_dialog::set_spec(const port_spec& spec) {
+	m_spec = spec;
+	m_name_text->setText(QString::fromStdString(m_spec.name));
+	m_alias_text->setText(QString::fromStdString(m_spec.alias));
+	m_data_bits->setValue(m_spec.data_bits);
+	m_stop_bits->setValue(m_spec.stop_bits);
+	m_baud->setValue(m_spec.baud);
 }
 
 }
