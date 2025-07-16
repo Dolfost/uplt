@@ -7,6 +7,10 @@
 #include <uplt/port_table_view.hpp>
 #include <uplt/port_spec_dialog.hpp>
 
+//  TODO: replace time based sample numbering with time based
+//  TODO: add data exporting (from graph)
+//  TODO: add ability to recieve and process multibyte data
+
 namespace uplt {
 
 MainWindow::MainWindow(
@@ -132,7 +136,9 @@ void MainWindow::request_port_registration_action() {
 	dialog->set_symbol_table(&m_transformation_symbol_table);
 	dialog->exec();
 	if (dialog->result() == QDialog::Accepted) {
-		m_ports->add_port(dialog->spec(), new graph(m_plot->xAxis, m_plot->yAxis));
+		auto g = new graph(m_plot->xAxis, m_plot->yAxis);
+		g->setAntialiased(m_antialiasing);
+		m_ports->add_port(dialog->spec(), g);
 		if (not m_ports->ports().back()->serial->isOpen())
 			message_serial_port_error_string(m_ports->ports().back()->serial.get());
 	}
@@ -175,6 +181,13 @@ void MainWindow::set_graph_following_action(bool state) {
 	m_follow_graph = state;
 }
 
+void MainWindow::antialiasing_action(bool state) {
+	m_antialiasing = state;
+	auto n = m_plot->graphCount();
+	for (decltype(n) i = 0; i < n; i++)
+		m_plot->graph(i)->setAntialiased(m_antialiasing);
+}
+
 void MainWindow::setup_menubar() {
 	auto m = menuBar();
 	QAction* a;
@@ -185,20 +198,26 @@ void MainWindow::setup_menubar() {
 		this, &MainWindow::request_port_registration_action
 	);
 
-	auto graph = m->addMenu("Graphs");
+	auto view = m->addMenu("View");
 	connect( 
-		(m_start_stop_action = graph->addAction("Plotting")), &QAction::triggered,
+		(m_start_stop_action = view->addAction("Plotting")), &QAction::triggered,
 		this, &MainWindow::start_stop_plotting_action
 	);
 	connect( 
-		graph->addAction("Clear timeline"), &QAction::triggered,
+		view->addAction("Clear timeline"), &QAction::triggered,
 		this, &MainWindow::clear_timeline_action
 	);
-	a = graph->addAction("Follow graph");
+	a = view->addAction("Follow graph");
 	a->setCheckable(true);
 	connect( 
 		a, &QAction::toggled,
 		this, &MainWindow::set_graph_following_action
+	);
+	a = view->addAction("Antialiasing");
+	a->setCheckable(true);
+	connect( 
+		a, &QAction::toggled,
+		this, &MainWindow::antialiasing_action
 	);
 }
 

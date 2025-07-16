@@ -27,6 +27,7 @@ protected slots:
 	void start_stop_plotting_action();
 	void set_graph_following_action(bool state);
 	void request_port_registration_action();
+	void antialiasing_action(bool state);
 
 protected slots:
 	void process_input_samples(port* pt);
@@ -58,6 +59,7 @@ private:
 
 	bool m_is_plotting = false;
 	bool m_follow_graph = false;
+	bool m_antialiasing = false;
 
 	uplt::port_table_model* m_ports = new uplt::port_table_model;
 };
