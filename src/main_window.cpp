@@ -7,7 +7,7 @@
 #include <uplt/port_table_view.hpp>
 #include <uplt/port_spec_dialog.hpp>
 
-//  TODO: add data exporting (from graph)
+//  TODO: add possibility to change graph visuals and randomize the graph color on creation
 //  TODO: add ability to recieve and process multibyte data
 
 namespace uplt {

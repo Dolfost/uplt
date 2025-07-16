@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QHeaderView>
 #include <QMenu>
+#include <QFileDialog>
 
 #include <functional>
 
@@ -64,6 +65,13 @@ void port_table_view::show_context_menu(const QPoint& pos) {
 		this, std::bind(&port_table_view::delete_action, this, p, row)
 	);
 
+	menu->addSeparator();
+
+	connect( 
+		menu->addAction("Export data"), &QAction::triggered, 
+		this, std::bind(&port_table_view::export_data_action, this, p, row)
+	);
+
 	menu->popup(viewport()->mapToGlobal(pos));
 }
 
@@ -83,6 +91,27 @@ void port_table_view::edit_action(port* p, std::size_t row) {
 
 void port_table_view::delete_action(port* p, std::size_t row) {
 	model()->removeRow(row);
+}
+
+void port_table_view::export_data_action(port* p, std::size_t row) {
+	auto dialog = new QFileDialog(
+		this, QString("Exporting data from %1").arg(p->alias.size() == 0 ? p->name : p->alias),
+		"", "Text files (*.txt);;CSV files (*.csv)"
+	);
+	dialog->setAcceptMode(QFileDialog::AcceptMode::AcceptSave);
+	dialog->selectFile("data");
+	dialog->setAttribute(Qt::WA_DeleteOnClose);
+	connect( 
+		dialog, &QFileDialog::fileSelected,
+		[=](const QString& file) {
+			QFile out(file);
+			out.open(QFile::WriteOnly);
+			QTextStream stream(&out);
+			for (const auto& d: *(p->graph->data().get()))
+				stream << QString::number(d.mainKey(), 'g', 10) << ' ' << QString::number(d.mainValue(), 'g', 5) << '\n';
+		}
+	);
+	dialog->show();
 }
 
 }

@@ -30,6 +30,7 @@ protected slots:
 protected slots:
 	void edit_action(port* p, std::size_t row);
 	void delete_action(port* p, std::size_t row);
+	void export_data_action(port* p, std::size_t row);
 
 };
 
