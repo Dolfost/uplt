@@ -10,10 +10,13 @@
 #include <QLineEdit>
 #include <QSerialPort>
 
+#include <chrono>
+
 #include <qcustomplot.h>
 #include <exprtk.hpp>
 
 #include <uplt/port_table_model.hpp>
+
 
 namespace uplt {
 
@@ -60,6 +63,9 @@ private:
 	bool m_is_plotting = false;
 	bool m_follow_graph = false;
 	bool m_antialiasing = false;
+
+	using clock = std::chrono::high_resolution_clock;
+	std::chrono::time_point<clock> m_start_time = clock::now();
 
 	uplt::port_table_model* m_ports = new uplt::port_table_model;
 };

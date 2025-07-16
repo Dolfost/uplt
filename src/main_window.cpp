@@ -7,7 +7,6 @@
 #include <uplt/port_table_view.hpp>
 #include <uplt/port_spec_dialog.hpp>
 
-//  TODO: replace time based sample numbering with time based
 //  TODO: add data exporting (from graph)
 //  TODO: add ability to recieve and process multibyte data
 
@@ -71,13 +70,17 @@ MainWindow::MainWindow(
 		this, &MainWindow::unregister_port
 	);
 
-	m_plot->xAxis->setRange(0, 2000);
+	m_plot->xAxis->setRange(0, 60);
 	m_plot->yAxis->setRange(-5, 260);
+	m_plot->xAxis->setLabel("Seconds");
+	m_plot->yAxis->setLabel("Value");
+	m_plot->yAxis->setNumberPrecision(5);
+	resize(1000, 500);
 
 #ifdef UPLT_DEBUG 
-	m_ports->add_port({UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY "SINE"}, new graph(m_plot->xAxis, m_plot->yAxis));
-	m_ports->add_port({UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY "SQUARE"}, new graph(m_plot->xAxis, m_plot->yAxis));
-	m_ports->add_port({UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY "RAMP"}, new graph(m_plot->xAxis, m_plot->yAxis));
+	m_ports->add_port({UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY "SINE", "sine" }, new graph(m_plot->xAxis, m_plot->yAxis));
+	m_ports->add_port({UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY "SQUARE", "square" }, new graph(m_plot->xAxis, m_plot->yAxis));
+	m_ports->add_port({UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY "RAMP", "ramp" }, new graph(m_plot->xAxis, m_plot->yAxis));
 	m_parser.compile("x", m_ports->ports()[0]->ex);
 	m_parser.compile("x", m_ports->ports()[1]->ex);
 	m_parser.compile("x", m_ports->ports()[2]->ex);
@@ -90,31 +93,27 @@ void MainWindow::process_input_samples(port* pt) {
 		return;
 
 	uint8_t sample;
-	auto before_x = pt->sample_no;
-	double before_y; 
-	if (pt->graph->data()->end() != pt->graph->data()->begin())
-		before_y = (*(pt->graph->data()->end())).mainValue();
-	else 
-		before_y = 0;
+	double when;
 	while (not pt->serial->atEnd()) { 
 		pt->serial->read(reinterpret_cast<char*>(&sample), 1);
 		x = sample;
-		pt->graph->addData(pt->sample_no++, pt->ex.value());
-		qDebug() << QString("%1: %2, %3").arg(pt->name).arg(pt->sample_no - 1).arg(pt->ex.value());
+		when = std::chrono::duration<double>(clock::now() - m_start_time).count();
+		pt->graph->addData(when, pt->ex.value());
+		qDebug() << QString("%1: %2, %3").arg(pt->name).arg(when).arg(pt->ex.value());
 	}
 
 	m_plot->replot();
 
 	if (m_follow_graph) { 
     double width = m_plot->xAxis->range().size();
-    m_plot->xAxis->setRange(pt->sample_no - width, pt->sample_no);
+    m_plot->xAxis->setRange(when - width, when);
 	}
 }
 
 void MainWindow::clear_timeline_action() { 
 	for (auto& p: m_ports->ports()) {
 		p->graph->data()->clear();
-		p->sample_no = 0;
+		m_start_time = clock::now();
 	}
 	m_plot->replot();
 }
@@ -138,6 +137,8 @@ void MainWindow::request_port_registration_action() {
 	if (dialog->result() == QDialog::Accepted) {
 		auto g = new graph(m_plot->xAxis, m_plot->yAxis);
 		g->setAntialiased(m_antialiasing);
+		if (m_ports->rowCount() == 0)
+			m_start_time = clock::now();
 		m_ports->add_port(dialog->spec(), g);
 		if (not m_ports->ports().back()->serial->isOpen())
 			message_serial_port_error_string(m_ports->ports().back()->serial.get());
@@ -179,6 +180,11 @@ void MainWindow::message_serial_port_error_string(QSerialPort* sp) {
 
 void MainWindow::set_graph_following_action(bool state) {
 	m_follow_graph = state;
+	if (m_follow_graph) {
+		m_plot->axisRect()->setRangeDrag(Qt::Vertical);
+	} else  {
+		m_plot->axisRect()->setRangeDrag(Qt::Vertical | Qt::Horizontal);
+	}
 }
 
 void MainWindow::antialiasing_action(bool state) {

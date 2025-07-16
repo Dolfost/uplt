@@ -9,7 +9,6 @@
 
 #include <memory>
 #include <vector>
-#include <cstdint>
 
 #include <uplt/port_spec.hpp>
 #include <uplt/graph.hpp>
@@ -19,7 +18,6 @@ namespace uplt {
 struct port: public port_spec {
 	port(QSerialPort* p, const port_spec& ps): port_spec(ps), serial(p) {};
 	port() = delete;
-	uint64_t sample_no = 0;
 	std::unique_ptr<QSerialPort> serial;
 	graph* graph;
 	void apply_settings_to_serial_port() {
