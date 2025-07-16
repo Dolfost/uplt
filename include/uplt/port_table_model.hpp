@@ -21,8 +21,6 @@ struct port: public port_spec {
 	port() = delete;
 	uint64_t sample_no = 0;
 	std::unique_ptr<QSerialPort> serial;
-	exprtk::expression<double> expression;
-	std::string expression_str = "x";
 	graph* graph;
 	void apply_settings_to_serial_port() {
 		serial->setPortName(QString::fromStdString(name));

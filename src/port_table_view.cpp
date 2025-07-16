@@ -72,6 +72,8 @@ void port_table_view::edit_action(port* p, std::size_t row) {
 	dialog->setAttribute(Qt::WA_DeleteOnClose);
 	dialog->set_spec(*static_cast<port_spec*>(p));
 	dialog->setWindowTitle(QString("Editing port %1").arg(p->alias.size() != 0 ? p->alias : p->name));
+	dialog->set_parser(m_parser);
+	dialog->set_symbol_table(m_symbol_table);
 	connect(
 		dialog, &QDialog::accepted,
 		[=]() { static_cast<port_table_model*>(model())->update_port(p, dialog->spec()); }

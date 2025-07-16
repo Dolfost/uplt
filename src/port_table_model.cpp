@@ -43,7 +43,7 @@ QVariant port_table_model::data(const QModelIndex &index, int role) const {
 				case column::baud:
 					return p.serial->baudRate();
 				case column::transform_expression:
-					return QString::fromStdString(p.expression_str);
+					return QString::fromStdString(p.fx);
 			}
 		} case Qt::ToolTipRole: {
 			switch (index.column()) {
@@ -111,7 +111,7 @@ void port_table_model::update_port(port* p, const port_spec& spec) {
 	const auto row = std::distance(m_ports.begin(), pt);
 	emit dataChanged(
 		index(row, 0), 
-		index(row, column::columns+10)
+		index(row, column::columns)
 	);
 }
 

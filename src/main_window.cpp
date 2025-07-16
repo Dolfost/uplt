@@ -34,6 +34,8 @@ MainWindow::MainWindow(
 	table_message_widget->layout()->addWidget(m_table_message_splitter);
 	auto table = new uplt::port_table_view;
 	table->setModel(m_ports);
+	table->set_symbol_table(&m_transformation_symbol_table);
+	table->set_parser(&m_parser);
 	m_table_message_splitter->addWidget(table);
 	m_table_message_splitter->addWidget(m_messages);
 	m_table_message_splitter->setSizes({1, 0});
@@ -72,6 +74,9 @@ MainWindow::MainWindow(
 	m_ports->add_port({UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY "SINE"}, new graph(m_plot->xAxis, m_plot->yAxis));
 	m_ports->add_port({UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY "SQUARE"}, new graph(m_plot->xAxis, m_plot->yAxis));
 	m_ports->add_port({UPLT_VIRTUAL_SERIAL_PORT_DIRECTORY "RAMP"}, new graph(m_plot->xAxis, m_plot->yAxis));
+	m_parser.compile("x", m_ports->ports()[0]->ex);
+	m_parser.compile("x", m_ports->ports()[1]->ex);
+	m_parser.compile("x", m_ports->ports()[2]->ex);
 	start_stop_plotting_action();
 #endif
 }
@@ -90,8 +95,8 @@ void MainWindow::process_input_samples(port* pt) {
 	while (not pt->serial->atEnd()) { 
 		pt->serial->read(reinterpret_cast<char*>(&sample), 1);
 		x = sample;
-		pt->graph->addData(pt->sample_no++, sample);
-		qDebug() << QString("%1: %2, %3").arg(pt->name).arg(pt->sample_no - 1).arg(sample);
+		pt->graph->addData(pt->sample_no++, pt->ex.value());
+		qDebug() << QString("%1: %2, %3").arg(pt->name).arg(pt->sample_no - 1).arg(pt->ex.value());
 	}
 
 	m_plot->replot();
@@ -123,6 +128,8 @@ void MainWindow::start_stop_plotting_action() {
 
 void MainWindow::request_port_registration_action() {
 	auto dialog = new uplt::port_spec_dialog(this);
+	dialog->set_parser(&m_parser);
+	dialog->set_symbol_table(&m_transformation_symbol_table);
 	dialog->exec();
 	if (dialog->result() == QDialog::Accepted) {
 		m_ports->add_port(dialog->spec(), new graph(m_plot->xAxis, m_plot->yAxis));
@@ -141,7 +148,7 @@ void MainWindow::register_port(port* p) {
 		p->serial.get(), &QSerialPort::errorOccurred,
 		[this, p]() { message_serial_port_error_string(p->serial.get()); }
 	);
-	p->expression.register_symbol_table(m_transformation_symbol_table);
+	p->ex.register_symbol_table(m_transformation_symbol_table);
 }
 
 void MainWindow::unregister_port(port* p) {
