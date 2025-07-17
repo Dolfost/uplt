@@ -1,5 +1,5 @@
-#ifndef _PORT_TABLE_VIEW_HPP_
-#define _PORT_TABLE_VIEW_HPP_
+#ifndef _UPLT_PORT_TABLE_VIEW_HPP_
+#define _UPLT_PORT_TABLE_VIEW_HPP_
 
 #include <QTableView>
 
@@ -36,4 +36,4 @@ protected slots:
 
 }
 
-#endif // !_PORT_TABLE_VIEW_HPP_
+#endif // !_UPLT_PORT_TABLE_VIEW_HPP_

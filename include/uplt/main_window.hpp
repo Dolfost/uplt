@@ -1,5 +1,5 @@
-#ifndef _MAIN_WINDOW_HPP_
-#define _MAIN_WINDOW_HPP_
+#ifndef _UPLT_MAIN_WINDOW_HPP_
+#define _UPLT_MAIN_WINDOW_HPP_
 
 #include <QMainWindow>
 #include <QLabel>
@@ -72,5 +72,5 @@ private:
 
 }
 
-#endif // !_MAIN_WINDOW_HPP_
+#endif // !_UPLT_MAIN_WINDOW_HPP_
 

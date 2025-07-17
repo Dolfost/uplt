@@ -1,5 +1,5 @@
-#ifndef _PORT_SPEC_HPP_
-#define _PORT_SPEC_HPP_
+#ifndef _UPLT_PORT_SPEC_HPP_
+#define _UPLT_PORT_SPEC_HPP_
 
 #include <string>
 
@@ -19,4 +19,4 @@ struct port_spec {
 
 }
 
-#endif // !_PORT_SPEC_HPP_
+#endif // !_UPLT_PORT_SPEC_HPP_

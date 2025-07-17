@@ -1,5 +1,5 @@
-#ifndef _PART_TABLE_MODEDL_HPP_
-#define _PART_TABLE_MODEDL_HPP_
+#ifndef _UPLT_PORT_TABLE_MODEDL_HPP_
+#define _UPLT_PORT_TABLE_MODEDL_HPP_
 
 #include <QAbstractTableModel>
 #include <QSerialPort>
@@ -75,4 +75,4 @@ protected:
 
 }
 
-#endif // !_PART_TABLE_MODEDL_HPP_
+#endif // !_UPLT_PORT_TABLE_MODEDL_HPP_
