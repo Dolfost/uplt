@@ -11,11 +11,12 @@
 #include <vector>
 
 #include <uplt/port_spec.hpp>
+#include <uplt/graph_spec.hpp>
 #include <uplt/graph.hpp>
 
 namespace uplt { 
 
-struct port: public port_spec {
+struct port: public port_spec  {
 	port(QSerialPort* p, const port_spec& ps): port_spec(ps), serial(p) {};
 	port() = delete;
 	std::unique_ptr<QSerialPort> serial;

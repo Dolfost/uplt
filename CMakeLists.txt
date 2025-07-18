@@ -36,6 +36,7 @@ target_sources(uplt
 		src/port_table_view.cpp
 		src/port_spec_dialog.cpp
 		src/graph.cpp
+		src/graph_spec_dialog.cpp
 	PUBLIC FILE_SET HEADERS 
 	BASE_DIRS include/ FILES
 		include/uplt/main_window.hpp
@@ -44,6 +45,8 @@ target_sources(uplt
 		include/uplt/port_spec.hpp
 		include/uplt/port_spec_dialog.hpp
 		include/uplt/graph.hpp
+		include/uplt/graph_spec.hpp
+		include/uplt/graph_spec_dialog.hpp
 )
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	target_compile_definitions(uplt 

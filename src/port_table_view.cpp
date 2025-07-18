@@ -10,6 +10,7 @@
 
 #include <uplt/port_table_model.hpp>
 #include <uplt/port_spec_dialog.hpp>
+#include <uplt/graph_spec_dialog.hpp>
 
 namespace uplt { 
 
@@ -61,6 +62,10 @@ void port_table_view::show_context_menu(const QPoint& pos) {
 		this, std::bind(&port_table_view::edit_action, this, p, row)
 	);
 	connect( 
+		menu->addAction("Edit visuals"), &QAction::triggered, 
+		this, std::bind(&port_table_view::edit_visuals_action, this, p, row)
+	);
+	connect( 
 		menu->addAction("Delete"), &QAction::triggered, 
 		this, std::bind(&port_table_view::delete_action, this, p, row)
 	);
@@ -86,6 +91,13 @@ void port_table_view::edit_action(port* p, std::size_t row) {
 		dialog, &QDialog::accepted,
 		[=]() { static_cast<port_table_model*>(model())->update_port(p, dialog->spec()); }
 	);
+	dialog->show();
+}
+
+void port_table_view::edit_visuals_action(port* p, std::size_t row) {
+	auto dialog = new graph_spec_dialog(p);
+	dialog->setAttribute(Qt::WA_DeleteOnClose);
+	dialog->setWindowTitle(QString("Editing visuals on %1").arg(p->alias.size() != 0 ? p->alias : p->name));
 	dialog->show();
 }
 
