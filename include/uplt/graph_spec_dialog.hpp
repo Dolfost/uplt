@@ -2,7 +2,7 @@
 #define _UPLT_GRAPH_SPEC_DIALOG_HPP_
 
 #include <QDialog>
-#include <QSpinBox>
+#include <QDoubleSpinBox>
 #include <QLineEdit>
 #include <QLabel>
 
@@ -20,18 +20,20 @@ public:
 	void set_spec(const graph_spec& spec);
 
 protected:
-	QSpinBox* m_pen_width = new QSpinBox;
-	QComboBox* m_pen_style = new QComboBox;
-	QPushButton* m_pen_color_button = new QPushButton("Color...");
+	QDoubleSpinBox* m_pen_width = new QDoubleSpinBox;
+	QDoubleSpinBox* m_graph_scatter_size = new QDoubleSpinBox;
+	QPushButton* m_pen_color_button = new QPushButton("Pen color");
 	QComboBox* m_graph_line_style = new QComboBox;
-	QComboBox* m_graph_scatter_style = new QComboBox;
+	QComboBox* m_graph_scatter_shape = new QComboBox;
 
 	QComboBox* m_brush_style = new QComboBox;
-	QPushButton* m_brush_color_button = new QPushButton("Color...");
+	QPushButton* m_brush_color_button = new QPushButton("Fill color");
 
 	QLabel* m_preview_label = new QLabel;
 	
 	port* m_port = nullptr;
+
+	bool m_color_selection = false;
 
 protected:
 	void update_preview();

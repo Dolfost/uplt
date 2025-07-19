@@ -31,7 +31,7 @@ public:
 	}
 };
 
-port_table_view::port_table_view() { 
+port_table_view::port_table_view(QWidget* parent): QTableView(parent) { 
 	setSelectionBehavior(QAbstractItemView::SelectRows);
 	setSelectionMode(QAbstractItemView::SingleSelection);
 
@@ -95,7 +95,7 @@ void port_table_view::edit_action(port* p, std::size_t row) {
 }
 
 void port_table_view::edit_visuals_action(port* p, std::size_t row) {
-	auto dialog = new graph_spec_dialog(p);
+	auto dialog = new graph_spec_dialog(p, this);
 	dialog->setAttribute(Qt::WA_DeleteOnClose);
 	dialog->setWindowTitle(QString("Editing visuals on %1").arg(p->alias.size() != 0 ? p->alias : p->name));
 	dialog->show();

@@ -12,7 +12,7 @@ namespace uplt {
 class port_table_view: public QTableView { 
 Q_OBJECT
 public: 
-	port_table_view();
+	port_table_view(QWidget* parent = nullptr);
 
 public: 
 	exprtk::symbol_table<double>* symbol_table() { return m_symbol_table; }

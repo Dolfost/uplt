@@ -8,6 +8,8 @@
 #include <uplt/port_spec_dialog.hpp>
 
 //  TODO: add possibility to change graph visuals and randomize the graph color on creation
+//  TODO: add possibility to export graph images
+//  TODO: add "reopen" context menu option in port table view
 //  TODO: add ability to recieve and process multibyte data
 
 namespace uplt {
@@ -35,7 +37,7 @@ MainWindow::MainWindow(
 	table_message_widget->setLayout(new QVBoxLayout);
 	table_message_widget->layout()->setContentsMargins(0,0,0,0);
 	table_message_widget->layout()->addWidget(m_table_message_splitter);
-	auto table = new uplt::port_table_view;
+	auto table = new uplt::port_table_view(this);
 	table->setModel(m_ports);
 	table->set_symbol_table(&m_transformation_symbol_table);
 	table->set_parser(&m_parser);
