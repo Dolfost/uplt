@@ -7,8 +7,6 @@
 #include <uplt/port_table_view.hpp>
 #include <uplt/port_spec_dialog.hpp>
 
-//  TODO: add possibility to export graph images
-//  TODO: add possibility to hide graph
 //  TODO: add "reopen" context menu option in port table view
 //  TODO: add ability to recieve and process multibyte data
 

@@ -53,6 +53,7 @@ void port_table_view::show_context_menu(const QPoint& pos) {
 		return;
 
 	auto menu = new QMenu;
+	QAction* a;
 	port* p = static_cast<port_table_model*>(model())->ports()[index.row()].get();
 	const std::size_t row = index.row();
 	menu->setAttribute(Qt::WA_DeleteOnClose);
@@ -64,6 +65,17 @@ void port_table_view::show_context_menu(const QPoint& pos) {
 	connect( 
 		menu->addAction("Edit visuals"), &QAction::triggered, 
 		this, std::bind(&port_table_view::edit_visuals_action, this, p, row)
+	);
+	a = menu->addAction(p->graph->visible() ? "Hide" : "Show");
+	connect( 
+		a, &QAction::triggered, 
+		this, std::bind(&port_table_view::hide_graph_action, this, p, row)
+	);
+	connect(
+		a, &QAction::triggered, 
+		[=]() {
+			a->setText(p->graph->visible() ? "Hide" : "Show");
+		}
 	);
 	connect( 
 		menu->addAction("Delete"), &QAction::triggered, 
@@ -132,6 +144,10 @@ void port_table_view::export_data_action(port* p, std::size_t row) {
 		}
 	);
 	dialog->show();
+}
+
+void port_table_view::hide_graph_action(port* p, std::size_t row) {
+	p->graph->setVisible(not p->graph->visible());
 }
 
 }
