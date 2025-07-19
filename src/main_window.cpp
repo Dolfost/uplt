@@ -7,7 +7,6 @@
 #include <uplt/port_table_view.hpp>
 #include <uplt/port_spec_dialog.hpp>
 
-//  TODO: add "reopen" context menu option in port table view
 //  TODO: add ability to recieve and process multibyte data
 
 namespace uplt {

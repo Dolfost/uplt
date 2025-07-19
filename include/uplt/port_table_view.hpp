@@ -33,6 +33,7 @@ protected slots:
 	void delete_action(port* p, std::size_t row);
 	void export_data_action(port* p, std::size_t row);
 	void hide_graph_action(port* p, std::size_t row);
+	void reopen_serial_port_action(port* p, std::size_t row);
 
 };
 

@@ -85,6 +85,10 @@ void port_table_view::show_context_menu(const QPoint& pos) {
 	menu->addSeparator();
 
 	connect( 
+		menu->addAction("Reopen serial port"), &QAction::triggered, 
+		this, std::bind(&port_table_view::reopen_serial_port_action, this, p, row)
+	);
+	connect( 
 		menu->addAction("Export data"), &QAction::triggered, 
 		this, std::bind(&port_table_view::export_data_action, this, p, row)
 	);
@@ -148,6 +152,12 @@ void port_table_view::export_data_action(port* p, std::size_t row) {
 
 void port_table_view::hide_graph_action(port* p, std::size_t row) {
 	p->graph->setVisible(not p->graph->visible());
+}
+
+void port_table_view::reopen_serial_port_action(port* p, std::size_t row) {
+	p->serial->close();
+	p->serial->clearError();
+	p->serial->open(QSerialPort::ReadOnly);
 }
 
 }
