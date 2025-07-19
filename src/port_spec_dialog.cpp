@@ -8,7 +8,7 @@
 
 namespace uplt {
 
-port_spec_dialog::port_spec_dialog(QWidget *parent, Qt::WindowFlags f) {
+port_spec_dialog::port_spec_dialog(port* p, QWidget *parent, Qt::WindowFlags f): dialog(p, parent, f) {
 	setWindowTitle("Adding new serial connection");
 	auto main_lay = new QVBoxLayout;
 	auto grid_lay = new QGridLayout;

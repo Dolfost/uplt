@@ -10,10 +10,11 @@
 
 #include <uplt/graph_spec.hpp>
 #include <uplt/port_table_model.hpp>
+#include <uplt/dialog.hpp>
 
 namespace uplt {
 
-class graph_spec_dialog: public QDialog { 
+class graph_spec_dialog: public dialog { 
 	Q_OBJECT 
 public:
 	graph_spec_dialog(port* port, QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
@@ -31,8 +32,6 @@ protected:
 
 	QLabel* m_preview_label = new QLabel;
 	
-	port* m_port = nullptr;
-
 	bool m_color_selection = false;
 
 protected:

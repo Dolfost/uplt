@@ -8,13 +8,14 @@
 #include <exprtk.hpp>
 
 #include <uplt/port_spec.hpp>
+#include <uplt/dialog.hpp>
 
 namespace uplt {
 
-class port_spec_dialog: public QDialog { 
+class port_spec_dialog: public dialog { 
 	Q_OBJECT 
 public:
-	port_spec_dialog(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+	port_spec_dialog(port* p, QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 	const port_spec& spec() const { return m_spec; }
 	void set_spec(const port_spec& spec);
 

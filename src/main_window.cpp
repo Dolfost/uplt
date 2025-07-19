@@ -132,7 +132,7 @@ void MainWindow::start_stop_plotting_action() {
 }
 
 void MainWindow::request_port_registration_action() {
-	auto dialog = new uplt::port_spec_dialog(this);
+	auto dialog = new uplt::port_spec_dialog(nullptr, this);
 	dialog->set_parser(&m_parser);
 	dialog->set_symbol_table(&m_transformation_symbol_table);
 	dialog->exec();

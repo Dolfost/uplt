@@ -5,7 +5,7 @@
 
 namespace uplt {
 
-graph_spec_dialog::graph_spec_dialog(port* p, QWidget *parent, Qt::WindowFlags f): QDialog(parent, f), m_port(p) {
+graph_spec_dialog::graph_spec_dialog(port* p, QWidget *parent, Qt::WindowFlags f): dialog(p, parent, f) {
 	m_preview_label->setAlignment(Qt::AlignCenter);
 	auto main_layout = new QVBoxLayout;
 	this->setLayout(main_layout);

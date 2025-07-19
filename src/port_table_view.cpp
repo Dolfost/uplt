@@ -81,12 +81,16 @@ void port_table_view::show_context_menu(const QPoint& pos) {
 }
 
 void port_table_view::edit_action(port* p, std::size_t row) {
-	auto dialog = new port_spec_dialog();
+	auto dialog = new port_spec_dialog(p, this);
 	dialog->setAttribute(Qt::WA_DeleteOnClose);
 	dialog->set_spec(*static_cast<port_spec*>(p));
 	dialog->setWindowTitle(QString("Editing port %1").arg(p->alias.size() != 0 ? p->alias : p->name));
 	dialog->set_parser(m_parser);
 	dialog->set_symbol_table(m_symbol_table);
+	connect(
+		static_cast<port_table_model*>(model()), &port_table_model::port_removed,
+		dialog, &dialog::on_port_removal
+	);
 	connect(
 		dialog, &QDialog::accepted,
 		[=]() { static_cast<port_table_model*>(model())->update_port(p, dialog->spec()); }
@@ -96,6 +100,10 @@ void port_table_view::edit_action(port* p, std::size_t row) {
 
 void port_table_view::edit_visuals_action(port* p, std::size_t row) {
 	auto dialog = new graph_spec_dialog(p, this);
+	connect(
+		static_cast<port_table_model*>(model()), &port_table_model::port_removed,
+		dialog, &dialog::on_port_removal
+	);
 	dialog->setAttribute(Qt::WA_DeleteOnClose);
 	dialog->setWindowTitle(QString("Editing visuals on %1").arg(p->alias.size() != 0 ? p->alias : p->name));
 	dialog->show();

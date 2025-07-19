@@ -47,6 +47,7 @@ target_sources(uplt
 		include/uplt/graph.hpp
 		include/uplt/graph_spec.hpp
 		include/uplt/graph_spec_dialog.hpp
+		include/uplt/dialog.hpp
 )
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	target_compile_definitions(uplt 
