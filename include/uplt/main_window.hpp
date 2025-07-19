@@ -31,6 +31,7 @@ protected slots:
 	void set_graph_following_action(bool state);
 	void request_port_registration_action();
 	void antialiasing_action(bool state);
+	void export_image_action();
 
 protected slots:
 	void process_input_samples(port* pt);

@@ -7,8 +7,8 @@
 #include <uplt/port_table_view.hpp>
 #include <uplt/port_spec_dialog.hpp>
 
-//  TODO: add possibility to change graph visuals and randomize the graph color on creation
 //  TODO: add possibility to export graph images
+//  TODO: add possibility to hide graph
 //  TODO: add "reopen" context menu option in port table view
 //  TODO: add ability to recieve and process multibyte data
 
@@ -196,6 +196,23 @@ void MainWindow::antialiasing_action(bool state) {
 		m_plot->graph(i)->setAntialiased(m_antialiasing);
 }
 
+void MainWindow::export_image_action() {
+	auto dialog = new QFileDialog(this);
+	dialog->setAcceptMode(QFileDialog::AcceptSave);
+	dialog->setNameFilter("PNG Image (*.png)");
+	dialog->setDefaultSuffix("png");
+	dialog->selectFile("image.png");
+	dialog->setWindowTitle("Save Image As...");
+	dialog->setAttribute(Qt::WA_DeleteOnClose);
+	connect( 
+		dialog, &QFileDialog::fileSelected,
+		[=](const QString& file) {
+			m_plot->savePng(file, 0, 0, 1, -1, 100);
+		}
+	);
+	dialog->show();
+}
+
 void MainWindow::setup_menubar() {
 	auto m = menuBar();
 	QAction* a;
@@ -226,6 +243,10 @@ void MainWindow::setup_menubar() {
 	connect( 
 		a, &QAction::toggled,
 		this, &MainWindow::antialiasing_action
+	);
+	connect( 
+		view->addAction("Export image"), &QAction::triggered,
+		this, &MainWindow::export_image_action
 	);
 }
 
